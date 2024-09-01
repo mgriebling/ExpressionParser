@@ -11,6 +11,9 @@ public struct ExpressionParser {
     public init(_ expression: String) {
         self.input = InputStream(data: expression.data(using: .ascii)!)
         self.scanner = Scanner(s: self.input)
+        
+        // add syome symbols to the parser
+        Ident.addSymbol(("x", 10))
     }
     
     public func parse () -> (String, Double)? {

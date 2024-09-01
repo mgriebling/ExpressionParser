@@ -239,6 +239,13 @@ public class Ident: Expr {
     static var _symbols : [String: Double] = [
         "pi"  : Double.pi
     ]
+    
+    static func addSymbol( _ x: (String, Double)) {
+        if let _ = _symbols[x.0] {
+            print("Duplicate symbol \"\(x.0)\"")
+        }
+        _symbols[x.0] = x.1
+    }
 
     init(_ o: Obj) { obj = o }
     override public func dump() { printn(obj.name) }
@@ -317,9 +324,9 @@ public class Block: Stat {
     }
     
     override public var mathml: String {
-        var r = stats.last?.mathml ?? "?"
+        return stats.last?.mathml ?? "?"
         // for s in stats { r += s.mathml + "\n" }
-        return r
+        // return r
     }
 }
 
