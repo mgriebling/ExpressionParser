@@ -26,7 +26,7 @@
     Coco/R itself) does not fall under the GNU General Public License.
 
     NOTE: The code below has been automatically generated from the
-    Parser.frame, Scanner.frame and Coco.atg files.  DO NOT EDIT HERE.
+    Parser.frame, Scanner.frame and taste.atg files.  DO NOT EDIT HERE.
 -------------------------------------------------------------------------*/
 
 import Foundation
@@ -48,9 +48,9 @@ public class Parser {
 	public let _decInt = 11
 	public let _baseInt = 12
 	public let _let = 14
-	public let _true = 20
-	public let _false = 21
-	public let maxT = 37
+	public let _true = 21
+	public let _false = 22
+	public let maxT = 38
 
 	static let _T = true
 	static let _x = false
@@ -65,6 +65,7 @@ public class Parser {
 	var errDist = Parser.minErrDist
 
 	var curBlock: Proc!  // current program unit (procedure or main program)
+	var result: (s:String, d:Double)?
 	
 	
 
@@ -127,18 +128,17 @@ public class Parser {
         }
     }
 
-	func Program() -> (String, Double) {
-		curBlock = Proc("", nil, self); curBlock.block = Block()
+	func Program() {
+		curBlock = Proc("", nil, self); curBlock.block = Block() 
 		BlockList(curBlock.block)
-		curBlock.dump()
-        return (curBlock.mathml, curBlock.block!.value)
-//		if let f = OutputStream(toFileAtPath: "test.html", append: false), let d = x.data(using: .utf8) {
-//		  f.open()
-//		  let bytes = [UInt8](d)
-//		  f.write(bytes, maxLength: bytes.count)
-//		  print("\n\n\(x)")
-//		  f.close()
-//		}
+		result = (curBlock.mathml, curBlock.block!.value)
+		// if let f = OutputStream(toFileAtPath: "test.html", append: false), let d = x.data(using: .utf8) {
+		//   f.open()
+		//   let bytes = [UInt8](d)
+		//   f.write(bytes, maxLength: bytes.count)
+		//   print("\n\n\(x)")
+		//   f.close()
+		//}
 		
 	}
 
@@ -191,24 +191,24 @@ public class Parser {
 	func RelOp(_ op: inout Operator) {
 		op = .EQU 
 		switch la.kind {
-		case 31 /* "==" */: 
+		case 32 /* "==" */: 
 			Get()
-		case 32 /* "!=" */: 
+		case 33 /* "!=" */: 
 			Get()
 			op = .NEQ 
-		case 33 /* "<=" */: 
+		case 34 /* "<=" */: 
 			Get()
 			op = .LEQ 
-		case 34 /* "<" */: 
+		case 35 /* "<" */: 
 			Get()
 			op = .LSS 
-		case 35 /* ">" */: 
+		case 36 /* ">" */: 
 			Get()
 			op = .GTR 
-		case 36 /* ">=" */: 
+		case 37 /* ">=" */: 
 			Get()
 			op = .GEQ 
-		default: SynErr(38)
+		default: SynErr(39)
 		}
 	}
 
@@ -224,24 +224,24 @@ public class Parser {
 
 	func AddOp(_ op: inout Operator) {
 		op = .ADD 
-		if la.kind == 22 /* "+" */ {
+		if la.kind == 23 /* "+" */ {
 			Get()
-		} else if la.kind == 18 /* "-" */ {
+		} else if la.kind == 19 /* "-" */ {
 			Get()
 			op = .SUB 
 		} else if la.kind == _minus {
 			Get()
 			op = .SUB 
-		} else if la.kind == 23 /* "|" */ {
+		} else if la.kind == 24 /* "|" */ {
 			Get()
 			op = .OR  
-		} else { SynErr(39) }
+		} else { SynErr(40) }
 	}
 
 	func Power(_ e: inout Expr?) {
 		var e2: Expr? = nil; var op = Operator.EQU 
 		Factor(&e)
-		while la.kind == 29 /* "^" */ || la.kind == 30 /* "**" */ {
+		while la.kind == 30 /* "^" */ || la.kind == 31 /* "**" */ {
 			PowerOp(&op)
 			Factor(&e2)
 			e = BinExpr(e, op, e2) 
@@ -251,56 +251,60 @@ public class Parser {
 	func MulOp(_ op: inout Operator) {
 		op = .MUL 
 		switch la.kind {
-		case 24 /* "*" */: 
+		case 25 /* "*" */: 
 			Get()
 		case _times: 
 			Get()
 		case _divide: 
 			Get()
 			op = .DIV 
-		case 25 /* "/" */: 
+		case 26 /* "/" */: 
 			Get()
 			op = .DIV 
-		case 26 /* "%" */: 
+		case 27 /* "%" */: 
 			Get()
 			op = .REM 
-		case 27 /* "&" */: 
+		case 28 /* "&" */: 
 			Get()
 			op = .AND 
-		default: SynErr(40)
+		default: SynErr(41)
 		}
 	}
 
 	func Factor(_ e: inout Expr?) {
-		var name = ""; var op = Operator.EQU 
+		var name = ""; var f:Expr?; var op = Operator.EQU 
 		switch la.kind {
 		case _ident: 
-			e = nil 
+			e = nil; f = nil 
 			Get()
 			name = t.val; e = Ident(curBlock.find(name)) 
 			if StartOf(4) {
-				if la.kind == _squared || la.kind == _cubed || la.kind == 28 /* "!" */ {
+				if la.kind == _squared || la.kind == _cubed || la.kind == 29 /* "!" */ {
 					UnaryOp(&op)
 					e = UnaryExpr(op, e) 
 				} else {
 					Get()
 					Expression(&e)
-					e = BuiltInProc(name, e) 
-					Expect(17 /* ")" */)
+					if la.kind == 17 /* "," */ {
+						Get()
+						Expression(&f)
+					}
+					Expect(18 /* ")" */)
 				}
+				e = BuiltInProc(name, e, f) 
 			}
 		case _number: 
 			Get()
 			e = IntCon(Double(t.val) ?? 0) 
-			if la.kind == _squared || la.kind == _cubed || la.kind == 28 /* "!" */ {
+			if la.kind == _squared || la.kind == _cubed || la.kind == 29 /* "!" */ {
 				UnaryOp(&op)
 				e = UnaryExpr(op, e) 
 			}
-		case 18 /* "-" */: 
+		case 19 /* "-" */: 
 			Get()
 			Factor(&e)
 			e = UnaryExpr(Operator.SUB, e) 
-		case 19 /* "~" */: 
+		case 20 /* "~" */: 
 			Get()
 			Factor(&e)
 			e = UnaryExpr(Operator.NOT, e) 
@@ -313,24 +317,24 @@ public class Parser {
 		case 16 /* "(" */: 
 			Get()
 			Expression(&e)
-			Expect(17 /* ")" */)
-		default: SynErr(41)
+			Expect(18 /* ")" */)
+		default: SynErr(42)
 		}
 	}
 
 	func PowerOp(_ op: inout Operator) {
 		op = .POW 
-		if la.kind == 29 /* "^" */ {
+		if la.kind == 30 /* "^" */ {
 			Get()
-		} else if la.kind == 30 /* "**" */ {
+		} else if la.kind == 31 /* "**" */ {
 			Get()
 			op = .POW 
-		} else { SynErr(42) }
+		} else { SynErr(43) }
 	}
 
 	func UnaryOp(_ op: inout Operator) {
 		op = .FACT 
-		if la.kind == 28 /* "!" */ {
+		if la.kind == 29 /* "!" */ {
 			Get()
 		} else if la.kind == _squared {
 			Get()
@@ -338,25 +342,28 @@ public class Parser {
 		} else if la.kind == _cubed {
 			Get()
 			op = .CUB 
-		} else { SynErr(43) }
+		} else { SynErr(44) }
 	}
 
-    public func Parse() -> (String, Double) {
+
+
+    public func Parse() -> (String, Double)? {
         la = Token()
         la.val = ""
         Get()
-		let result = Program()
+		Program()
 		Expect(_EOF)
-        return result
+
+	return result
 	}
 
     func set (_ x: Int, _ y: Int) -> Bool { return Parser._set[x][y] }
     static let _set: [[Bool]] = [
-		[_T,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x],
-		[_x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_T, _T,_T,_T,_T, _T,_x,_x],
-		[_x,_x,_x,_x, _x,_T,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_T,_x, _x,_x,_T,_T, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x],
-		[_x,_x,_x,_T, _T,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _T,_T,_T,_T, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x],
-		[_x,_T,_T,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _T,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _T,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x]
+		[_T,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x],
+		[_x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _T,_T,_T,_T, _T,_T,_x,_x],
+		[_x,_x,_x,_x, _x,_T,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_T, _x,_x,_x,_T, _T,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x],
+		[_x,_x,_x,_T, _T,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_T,_T,_T, _T,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x],
+		[_x,_T,_T,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _T,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_T,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x]
 
 	]
 } // end Parser
@@ -394,33 +401,34 @@ public class Errors {
 		case 14: s = "\"let\" expected"
 		case 15: s = "\"=\" expected"
 		case 16: s = "\"(\" expected"
-		case 17: s = "\")\" expected"
-		case 18: s = "\"-\" expected"
-		case 19: s = "\"~\" expected"
-		case 20: s = "\"true\" expected"
-		case 21: s = "\"false\" expected"
-		case 22: s = "\"+\" expected"
-		case 23: s = "\"|\" expected"
-		case 24: s = "\"*\" expected"
-		case 25: s = "\"/\" expected"
-		case 26: s = "\"%\" expected"
-		case 27: s = "\"&\" expected"
-		case 28: s = "\"!\" expected"
-		case 29: s = "\"^\" expected"
-		case 30: s = "\"**\" expected"
-		case 31: s = "\"==\" expected"
-		case 32: s = "\"!=\" expected"
-		case 33: s = "\"<=\" expected"
-		case 34: s = "\"<\" expected"
-		case 35: s = "\">\" expected"
-		case 36: s = "\">=\" expected"
-		case 37: s = "??? expected"
-		case 38: s = "invalid RelOp"
-		case 39: s = "invalid AddOp"
-		case 40: s = "invalid MulOp"
-		case 41: s = "invalid Factor"
-		case 42: s = "invalid PowerOp"
-		case 43: s = "invalid UnaryOp"
+		case 17: s = "\",\" expected"
+		case 18: s = "\")\" expected"
+		case 19: s = "\"-\" expected"
+		case 20: s = "\"~\" expected"
+		case 21: s = "\"true\" expected"
+		case 22: s = "\"false\" expected"
+		case 23: s = "\"+\" expected"
+		case 24: s = "\"|\" expected"
+		case 25: s = "\"*\" expected"
+		case 26: s = "\"/\" expected"
+		case 27: s = "\"%\" expected"
+		case 28: s = "\"&\" expected"
+		case 29: s = "\"!\" expected"
+		case 30: s = "\"^\" expected"
+		case 31: s = "\"**\" expected"
+		case 32: s = "\"==\" expected"
+		case 33: s = "\"!=\" expected"
+		case 34: s = "\"<=\" expected"
+		case 35: s = "\"<\" expected"
+		case 36: s = "\">\" expected"
+		case 37: s = "\">=\" expected"
+		case 38: s = "??? expected"
+		case 39: s = "invalid RelOp"
+		case 40: s = "invalid AddOp"
+		case 41: s = "invalid MulOp"
+		case 42: s = "invalid Factor"
+		case 43: s = "invalid PowerOp"
+		case 44: s = "invalid UnaryOp"
 
         default: s = "error \(n)"
         }

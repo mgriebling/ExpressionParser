@@ -16,8 +16,8 @@ public class Node {
     public init() {}
     public func dump() {}
     func printn(_ s: String) { print(s, terminator: "") }
-    public var value: Double { return 0 }
-    public var mathml: String { return "" }
+    public var value: Double { 0 }
+    public var mathml: String { "" }
 }
 
 
@@ -36,6 +36,10 @@ public class Var : Obj {       // variables
 }
 
 public class BuiltInProc : Expr {
+    
+    func root(_ x: Double, _ n: Int) -> Double {
+        pow(x, 1.0/Double(n))
+    }
     
     static var _builtIns : [String: (_:Double) -> Double] = [
         "sin"  : sin,
@@ -61,11 +65,22 @@ public class BuiltInProc : Expr {
     
     var op: (_:Double) -> Double
     var arg: Expr?
+    var arg2: Expr?
     var name: String
     
-    init(_ name: String, _ arg: Expr?) { op = BuiltInProc._builtIns[name] ?? { _ in 0 }; self.name = name; self.arg = arg; super.init() }
+    init(_ name: String, _ arg: Expr?, _ arg2: Expr? = nil) {
+        op = BuiltInProc._builtIns[name] ?? { _ in 0 };
+        self.name = name; self.arg = arg; self.arg2 = arg2
+        super.init()
+    }
     override public func dump() { printn("Built-in " + name + "("); arg?.dump(); printn(")") }
-    override public var value: Double { return op(Double(arg?.value ?? 0)) }
+    override public var value: Double {
+        if let arg2 = arg2 {
+            // handle special case for root
+            return root(arg?.value ?? 0, Int(arg2.value))
+        }
+        return op(Double(arg?.value ?? 0))
+    }
     
     override public var mathml: String {
         let x = arg?.mathml ?? ""
@@ -73,6 +88,7 @@ public class BuiltInProc : Expr {
         switch name {
         case "sqrt": return root(x, n: 2)
         case "cbrt": return root(x, n: 3)
+        case "root": return root(x, n: Int(arg2!.value))
         case "abs": return fenced(x, open: "|", close: "|")
         case "exp": return power(variable("e"), to: x)
         case "log", "log10": s += "\(variable("\\log"))_{\(number(10))}"

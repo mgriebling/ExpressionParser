@@ -26,7 +26,7 @@
     Coco/R itself) does not fall under the GNU General Public License.
 
     NOTE: The code below has been automatically generated from the
-    Parser.frame, Scanner.frame and Coco.atg files.  DO NOT EDIT HERE.
+    Parser.frame, Scanner.frame and taste.atg files.  DO NOT EDIT HERE.
 -------------------------------------------------------------------------*/
 
 import Foundation
@@ -228,8 +228,8 @@ public class UTF8Buffer: Buffer {
 public class Scanner {
 	let EOL : Character = "\n"
 	let eofSym = 0 /* pdt */
-	let maxT = 37
-	let noSym = 37
+	let maxT = 38
+	let noSym = 38
 
 
 	var buffer: Buffer?			// scanner buffer
@@ -252,24 +252,25 @@ public class Scanner {
 		result[215] = 3
 		result[247] = 4
 		result[8722] = 5
-		result[48] = 25
-		result[35] = 21
-		result[59] = 26
-		result[61] = 42
-		result[40] = 27
-		result[41] = 28
-		result[45] = 29
-		result[126] = 30
-		result[43] = 31
-		result[124] = 32
-		result[42] = 43
-		result[47] = 33
-		result[37] = 34
-		result[38] = 35
-		result[33] = 44
-		result[94] = 36
-		result[60] = 45
-		result[62] = 46
+		result[48] = 26
+		result[35] = 22
+		result[59] = 28
+		result[61] = 45
+		result[40] = 29
+		result[44] = 30
+		result[41] = 31
+		result[45] = 32
+		result[126] = 33
+		result[43] = 34
+		result[124] = 35
+		result[42] = 46
+		result[47] = 36
+		result[37] = 37
+		result[38] = 38
+		result[33] = 47
+		result[94] = 39
+		result[60] = 48
+		result[62] = 49
 		result[Buffer.EOF] = -1
 
 		return result
@@ -368,16 +369,16 @@ public class Scanner {
 	func CheckLiteral() {
 		switch t.val {
 			case "let": t.kind = 14
-			case "true": t.kind = 20
-			case "false": t.kind = 21
+			case "true": t.kind = 21
+			case "false": t.kind = 22
 			default: break
 		}
 	}
 
 	func NextToken() -> Token {
-		while ch == " " || ch >= "\t" && ch <= "\n" || ch == "\r" {
-            NextCh()
-        }
+		while ch == " " ||
+			ch >= "\t" && ch <= "\n" || ch == "\r"
+		{ NextCh() }
 		if ch == "/" && Comment0() { return NextToken() }
 		var recKind = noSym
 		var recEnd = pos
@@ -412,134 +413,151 @@ public class Scanner {
 				else { t.kind = 6;  t.val = tval; CheckLiteral(); return t }
 			case 7:
 				recEnd = pos; recKind = 7
-				if ch >= "0" && ch <= "9" || ch == "_" { AddCh(); state = 7 }
-				else if ch == "i" { AddCh(); state = 12 }
+				if ch >= "0" && ch <= "9" || ch == "_" { AddCh(); state = 27 }
+				else if ch == "i" { AddCh(); state = 13 }
+				else if ch == "E" { AddCh(); state = 10 }
 				else if ch == "." { AddCh(); state = 8 }
 				else { t.kind = 7; break loop }
 			case 8:
 				recEnd = pos; recKind = 7
-				if ch >= "0" && ch <= "9" || ch == "_" { AddCh(); state = 8 }
-				else if ch == "i" { AddCh(); state = 12 }
-				else if ch == "E" { AddCh(); state = 9 }
+				if ch >= "0" && ch <= "9" || ch == "_" { AddCh(); state = 9 }
+				else if ch == "i" { AddCh(); state = 13 }
+				else if ch == "E" { AddCh(); state = 10 }
 				else { t.kind = 7; break loop }
 			case 9:
-				if ch >= "0" && ch <= "9" || ch == "_" { AddCh(); state = 11 }
-				else if ch == "+" || ch == "-" { AddCh(); state = 10 }
-				else { state = 0 }
+				recEnd = pos; recKind = 7
+				if ch >= "0" && ch <= "9" || ch == "_" { AddCh(); state = 9 }
+				else if ch == "i" { AddCh(); state = 13 }
+				else if ch == "E" { AddCh(); state = 10 }
+				else { t.kind = 7; break loop }
 			case 10:
-				if ch >= "0" && ch <= "9" || ch == "_" { AddCh(); state = 11 }
+				if ch >= "0" && ch <= "9" || ch == "_" { AddCh(); state = 12 }
+				else if ch == "+" || ch == "-" { AddCh(); state = 11 }
 				else { state = 0 }
 			case 11:
-				recEnd = pos; recKind = 7
-				if ch >= "0" && ch <= "9" || ch == "_" { AddCh(); state = 11 }
-				else if ch == "i" { AddCh(); state = 12 }
-				else { t.kind = 7; break loop }
+				if ch >= "0" && ch <= "9" || ch == "_" { AddCh(); state = 12 }
+				else { state = 0 }
 			case 12:
-				 t.kind = 7; break loop 
+				recEnd = pos; recKind = 7
+				if ch >= "0" && ch <= "9" || ch == "_" { AddCh(); state = 12 }
+				else if ch == "i" { AddCh(); state = 13 }
+				else { t.kind = 7; break loop }
 			case 13:
-				if ch >= "0" && ch <= "7" || ch == "_" { AddCh(); state = 14 }
-				else { state = 0 }
+				 t.kind = 7; break loop 
 			case 14:
-				recEnd = pos; recKind = 8
-				if ch >= "0" && ch <= "7" || ch == "_" { AddCh(); state = 14 }
-				else { t.kind = 8; break loop }
+				if ch >= "0" && ch <= "7" || ch == "_" { AddCh(); state = 15 }
+				else { state = 0 }
 			case 15:
-				if ch >= "0" && ch <= "9" || ch >= "A" && ch <= "F" || ch == "_" || ch >= "a" && ch <= "f" { AddCh(); state = 16 }
-				else { state = 0 }
+				recEnd = pos; recKind = 8
+				if ch >= "0" && ch <= "7" || ch == "_" { AddCh(); state = 15 }
+				else { t.kind = 8; break loop }
 			case 16:
-				recEnd = pos; recKind = 9
-				if ch >= "0" && ch <= "9" || ch >= "A" && ch <= "F" || ch == "_" || ch >= "a" && ch <= "f" { AddCh(); state = 16 }
-				else { t.kind = 9; break loop }
+				if ch >= "0" && ch <= "9" || ch >= "A" && ch <= "F" || ch == "_" || ch >= "a" && ch <= "f" { AddCh(); state = 17 }
+				else { state = 0 }
 			case 17:
-				if ch >= "0" && ch <= "1" || ch == "_" { AddCh(); state = 18 }
-				else { state = 0 }
+				recEnd = pos; recKind = 9
+				if ch >= "0" && ch <= "9" || ch >= "A" && ch <= "F" || ch == "_" || ch >= "a" && ch <= "f" { AddCh(); state = 17 }
+				else { t.kind = 9; break loop }
 			case 18:
-				recEnd = pos; recKind = 10
-				if ch >= "0" && ch <= "1" || ch == "_" { AddCh(); state = 18 }
-				else { t.kind = 10; break loop }
+				if ch >= "0" && ch <= "1" || ch == "_" { AddCh(); state = 19 }
+				else { state = 0 }
 			case 19:
-				if ch >= "0" && ch <= "9" || ch == "_" { AddCh(); state = 20 }
-				else { state = 0 }
+				recEnd = pos; recKind = 10
+				if ch >= "0" && ch <= "1" || ch == "_" { AddCh(); state = 19 }
+				else { t.kind = 10; break loop }
 			case 20:
-				recEnd = pos; recKind = 11
-				if ch >= "0" && ch <= "9" || ch == "_" { AddCh(); state = 20 }
-				else { t.kind = 11; break loop }
-			case 21:
-				if ch >= "0" && ch <= "9" || ch == "_" { AddCh(); state = 22 }
+				if ch >= "0" && ch <= "9" || ch == "_" { AddCh(); state = 21 }
 				else { state = 0 }
+			case 21:
+				recEnd = pos; recKind = 11
+				if ch >= "0" && ch <= "9" || ch == "_" { AddCh(); state = 21 }
+				else { t.kind = 11; break loop }
 			case 22:
-				if ch >= "0" && ch <= "9" || ch == "_" { AddCh(); state = 22 }
-				else if ch == "#" { AddCh(); state = 23 }
+				if ch >= "0" && ch <= "9" || ch == "_" { AddCh(); state = 23 }
 				else { state = 0 }
 			case 23:
-				if ch >= "0" && ch <= "9" || ch >= "A" && ch <= "Z" || ch == "_" || ch >= "a" && ch <= "z" { AddCh(); state = 24 }
+				if ch >= "0" && ch <= "9" || ch == "_" { AddCh(); state = 23 }
+				else if ch == "#" { AddCh(); state = 24 }
 				else { state = 0 }
 			case 24:
-				recEnd = pos; recKind = 12
-				if ch >= "0" && ch <= "9" || ch >= "A" && ch <= "Z" || ch == "_" || ch >= "a" && ch <= "z" { AddCh(); state = 24 }
-				else { t.kind = 12; break loop }
+				if ch >= "0" && ch <= "9" || ch >= "A" && ch <= "Z" || ch == "_" || ch >= "a" && ch <= "z" { AddCh(); state = 25 }
+				else { state = 0 }
 			case 25:
-				recEnd = pos; recKind = 7
-				if ch >= "0" && ch <= "9" || ch == "_" { AddCh(); state = 7 }
-				else if ch == "i" { AddCh(); state = 12 }
-				else if ch == "." { AddCh(); state = 8 }
-				else if ch == "o" { AddCh(); state = 13 }
-				else if ch == "x" { AddCh(); state = 15 }
-				else if ch == "b" { AddCh(); state = 17 }
-				else if ch == "d" { AddCh(); state = 19 }
-				else { t.kind = 7; break loop }
+				recEnd = pos; recKind = 12
+				if ch >= "0" && ch <= "9" || ch >= "A" && ch <= "Z" || ch == "_" || ch >= "a" && ch <= "z" { AddCh(); state = 25 }
+				else { t.kind = 12; break loop }
 			case 26:
-				 t.kind = 13; break loop 
+				recEnd = pos; recKind = 7
+				if ch >= "0" && ch <= "9" || ch == "_" { AddCh(); state = 27 }
+				else if ch == "i" { AddCh(); state = 13 }
+				else if ch == "E" { AddCh(); state = 10 }
+				else if ch == "." { AddCh(); state = 8 }
+				else if ch == "o" { AddCh(); state = 14 }
+				else if ch == "x" { AddCh(); state = 16 }
+				else if ch == "b" { AddCh(); state = 18 }
+				else if ch == "d" { AddCh(); state = 20 }
+				else { t.kind = 7; break loop }
 			case 27:
-				 t.kind = 16; break loop 
+				recEnd = pos; recKind = 7
+				if ch >= "0" && ch <= "9" || ch == "_" { AddCh(); state = 27 }
+				else if ch == "i" { AddCh(); state = 13 }
+				else if ch == "E" { AddCh(); state = 10 }
+				else if ch == "." { AddCh(); state = 8 }
+				else { t.kind = 7; break loop }
 			case 28:
-				 t.kind = 17; break loop 
+				 t.kind = 13; break loop 
 			case 29:
-				 t.kind = 18; break loop 
+				 t.kind = 16; break loop 
 			case 30:
-				 t.kind = 19; break loop 
+				 t.kind = 17; break loop 
 			case 31:
-				 t.kind = 22; break loop 
+				 t.kind = 18; break loop 
 			case 32:
-				 t.kind = 23; break loop 
+				 t.kind = 19; break loop 
 			case 33:
-				 t.kind = 25; break loop 
+				 t.kind = 20; break loop 
 			case 34:
-				 t.kind = 26; break loop 
+				 t.kind = 23; break loop 
 			case 35:
-				 t.kind = 27; break loop 
+				 t.kind = 24; break loop 
 			case 36:
-				 t.kind = 29; break loop 
+				 t.kind = 26; break loop 
 			case 37:
-				 t.kind = 30; break loop 
+				 t.kind = 27; break loop 
 			case 38:
-				 t.kind = 31; break loop 
+				 t.kind = 28; break loop 
 			case 39:
-				 t.kind = 32; break loop 
+				 t.kind = 30; break loop 
 			case 40:
-				 t.kind = 33; break loop 
+				 t.kind = 31; break loop 
 			case 41:
-				 t.kind = 36; break loop 
+				 t.kind = 32; break loop 
 			case 42:
-				recEnd = pos; recKind = 15
-				if ch == "=" { AddCh(); state = 38 }
-				else { t.kind = 15; break loop }
+				 t.kind = 33; break loop 
 			case 43:
-				recEnd = pos; recKind = 24
-				if ch == "*" { AddCh(); state = 37 }
-				else { t.kind = 24; break loop }
+				 t.kind = 34; break loop 
 			case 44:
-				recEnd = pos; recKind = 28
-				if ch == "=" { AddCh(); state = 39 }
-				else { t.kind = 28; break loop }
+				 t.kind = 37; break loop 
 			case 45:
-				recEnd = pos; recKind = 34
-				if ch == "=" { AddCh(); state = 40 }
-				else { t.kind = 34; break loop }
-			case 46:
-				recEnd = pos; recKind = 35
+				recEnd = pos; recKind = 15
 				if ch == "=" { AddCh(); state = 41 }
+				else { t.kind = 15; break loop }
+			case 46:
+				recEnd = pos; recKind = 25
+				if ch == "*" { AddCh(); state = 40 }
+				else { t.kind = 25; break loop }
+			case 47:
+				recEnd = pos; recKind = 29
+				if ch == "=" { AddCh(); state = 42 }
+				else { t.kind = 29; break loop }
+			case 48:
+				recEnd = pos; recKind = 35
+				if ch == "=" { AddCh(); state = 43 }
 				else { t.kind = 35; break loop }
+			case 49:
+				recEnd = pos; recKind = 36
+				if ch == "=" { AddCh(); state = 44 }
+				else { t.kind = 36; break loop }
 
 			default: break loop
 			}
