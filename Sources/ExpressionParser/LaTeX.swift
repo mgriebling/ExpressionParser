@@ -36,11 +36,11 @@ extension Node {
         return "\\frac{\(x)}{\(y)}"
     }
     
-    func root(_ x: String, n: Int) -> String {
-        if n == 2 {
+    func root(_ x: String, n: String) -> String {
+        if n == "2" {
             return "\\sqrt{\(x)}"
         } else {
-            return "\\sqrt[\(number(Double(n)))]{\(x)}"
+            return "\\sqrt[\(n)]{\(x)}"
         }
     }
     

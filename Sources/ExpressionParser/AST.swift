@@ -86,9 +86,9 @@ public class BuiltInProc : Expr {
         let x = arg?.mathml ?? ""
         var s = ""
         switch name {
-        case "sqrt": return root(x, n: 2)
-        case "cbrt": return root(x, n: 3)
-        case "root": return root(x, n: Int(arg2!.value))
+        case "sqrt": return root(x, n: "2")
+        case "cbrt": return root(x, n: "3")
+        case "root": return root(x, n: arg2!.mathml)
         case "abs": return fenced(x, open: "|", close: "|")
         case "exp": return power(variable("e"), to: x)
         case "log", "log10": s += "\(variable("\\log"))_{\(number(10))}"
@@ -313,12 +313,12 @@ public class Block: Stat {
     }
     
     public override var value: Double {
-        stats.first?.value ?? 0
+        stats.last?.value ?? 0
     }
     
     override public var mathml: String {
-        var r = ""
-        for s in stats { r += s.mathml + "\n" }
+        var r = stats.last?.mathml ?? "?"
+        // for s in stats { r += s.mathml + "\n" }
         return r
     }
 }
