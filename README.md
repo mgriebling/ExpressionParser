@@ -6,7 +6,7 @@ and produces both a `LaTeX` translation and an evaluated result.
 For example, the following:
 
 ```swift
-let e = ExpressionParser("\\frac{-{b}+\\sqrt{{b}^{2}-4{}{a}\\times{c}}}{2{}{a}}")
+let e = ExpressionParser("(-b+sqrt(b^2-4a*c))/2a")
 Ident.addSymbol(("a", 1))
 Ident.addSymbol(("b", -3))
 Ident.addSymbol(("c", -4))
