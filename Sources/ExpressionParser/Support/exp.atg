@@ -22,7 +22,7 @@ TOKENS
   minus       = '\u2212' .
   ident       = letter {baseDigit} .
   number      =  digit { digit } [ '.' ] [ { digit }
-                 [ 'E' [ '+' | '-' ] digit { digit } ]] ['i'] .
+                 [ 'E' [ '+' | '-' ] digit { digit } ]] .
   octalInt    = "0o" octDigit { octDigit } .
   hexInt      = "0x" hexDigit { hexDigit } .
   binInt      = "0b" binDigit { binDigit } .
@@ -36,16 +36,7 @@ IGNORE eol + lf + tab
 
 PRODUCTIONS
   Program  =                              (. curBlock = Proc("", nil, self); curBlock.block = Block() .)
-    BlockList<curBlock.block>             (. // curBlock.dump()
-                                             result = (curBlock.mathml, curBlock.block!.value)
-                                             // if let f = OutputStream(toFileAtPath: "test.html", append: false), let d = x.data(using: .utf8) {
-                                             //   f.open()
-                                             //   let bytes = [UInt8](d)
-                                             //   f.write(bytes, maxLength: bytes.count)
-                                             //   print("\n\n\(x)")
-                                             //   f.close()
-                                             //}
-                                           .)
+    BlockList<curBlock.block>             (. result = (curBlock.mathml, curBlock.block!.value)  .)
     .
 
   BlockList <_ b: Block?>                 (. var s: Stat? = nil .)
@@ -94,7 +85,7 @@ PRODUCTIONS
         }
       .
 
-  Factor <_ e: inout Expr?>               (. var name = ""; var f:Expr?; var op = Operator.EQU .)
+  Factor <_ e: inout Expr?>               (. var name = ""; var f, g:Expr?; var op = Operator.EQU .)
     =                                     (. e = nil; f = nil .)
          ident                            (. name = t.val; e = Ident(curBlock.find(name)) .)
          [(UnaryOp<&op>                   (. e = UnaryExpr(op, e) .)
@@ -104,8 +95,21 @@ PRODUCTIONS
             ]
            ')' )                          (. e = BuiltInProc(name, e, f) .)
          ]
-      |  number                           (. e = IntCon(Double(t.val) ?? 0) .)
-         [UnaryOp<&op>                    (. e = UnaryExpr(op, e) .)
+      |  number                           (. e = IntCon(t.val) .)
+         [UnaryOp<&op> |                  (. e = UnaryExpr(op, e) .)
+           ident                          (. name = t.val; f = Ident(curBlock.find(name)) .)
+           [
+           '(' Expression <&g>
+           ')'
+           ]                              (. if g == nil {
+                                                // implied multiplication to var
+                                                e = BinExpr(e, .IMUL, f)
+                                             } else {
+                                                // implied multiplication to func
+                                                f = BuiltInProc(name, g)
+                                                e = BinExpr(e, .IMUL, f)
+                                             }
+                                          .)
          ]
       | "-" Factor<&e>                    (. e = UnaryExpr(Operator.SUB, e) .)
       | "~" Factor<&e>                    (. e = UnaryExpr(Operator.NOT, e) .)

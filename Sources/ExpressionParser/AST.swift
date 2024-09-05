@@ -9,7 +9,8 @@
 import Foundation
 
 public enum Type { case UNDEF, INT, BOOL }
-public enum Operator { case EQU, LSS, GTR, GEQ, LEQ, NEQ, ADD, SUB, MUL, DIV, REM, OR, AND, NOT, POW, FACT, SQR, CUB }
+public enum Operator { case EQU, LSS, GTR, GEQ, LEQ, NEQ, ADD, SUB, MUL,
+                            IMUL, DIV, REM, OR, AND, NOT, POW, FACT, SQR, CUB }
 
 /// Base node class of the AST
 public class Node {
@@ -41,6 +42,10 @@ public class BuiltInProc : Expr {
         pow(x, 1.0/Double(n))
     }
     
+    func logy(_ x: Double, _ n: Int) -> Double {
+        log(x) / log(Double(n))
+    }
+    
     static var _builtIns : [String: (_:Double) -> Double] = [
         "sin"  : sin,
         "cos"  : cos,
@@ -58,6 +63,7 @@ public class BuiltInProc : Expr {
         "ln"   : log,
         "log"  : log10,
         "log10": log10,
+        "log2" : log2,
         "abs"  : abs,
         "sqrt" : sqrt,
         "cbrt" : cbrt
@@ -76,8 +82,12 @@ public class BuiltInProc : Expr {
     override public func dump() { printn("Built-in " + name + "("); arg?.dump(); printn(")") }
     override public var value: Double {
         if let arg2 = arg2 {
-            // handle special case for root
-            return root(arg?.value ?? 0, Int(arg2.value))
+            // handle special case for root & log
+            if name == "root" {
+                return root(arg?.value ?? 0, Int(arg2.value))
+            } else {
+                return logy(arg?.value ?? 0, Int(arg2.value))
+            }
         }
         return op(Double(arg?.value ?? 0))
     }
@@ -92,6 +102,8 @@ public class BuiltInProc : Expr {
         case "abs": return fenced(x, open: "|", close: "|")
         case "exp": return power(variable("e"), to: x)
         case "log", "log10": s += "\(variable("\\log"))_{\(number(10))}"
+        case "log2" : s += "\(variable("\\log"))_{\(number(2))}"
+        case "logy" : s += "\(variable("\\log"))_{\(Int(arg2?.value ?? 10))}"
         case "asin", "acos", "atan", "asinh", "acosh", "atanh":
             var f = name
             let _ = f.remove(at: f.startIndex)
@@ -158,7 +170,7 @@ public class BinExpr: Expr {
         switch op {
         case .ADD: return l + r
         case .SUB: return l - r
-        case .MUL: return l * r
+        case .MUL, .IMUL: return l * r
         case .DIV: return l / r
         case .REM: return Double(Int(l) % Int(r))
         case .AND: return Double(Int(l) & Int(r))
@@ -182,6 +194,7 @@ public class BinExpr: Expr {
         case .ADD: s = symbol("+")
         case .SUB: s = symbol("-")
         case .MUL: s = symbol("\\times")
+        case .IMUL: s = "{}"
         case .DIV: return fraction(l, over: r)
         case .REM: s = symbol("\\%")
         case .AND: s = symbol("\\&")
@@ -240,10 +253,7 @@ public class Ident: Expr {
         "pi"  : Double.pi
     ]
     
-    static func addSymbol( _ x: (String, Double)) {
-        if let _ = _symbols[x.0] {
-            print("Duplicate symbol \"\(x.0)\"")
-        }
+    static public func addSymbol( _ x: (String, Double)) {
         _symbols[x.0] = x.1
     }
 
@@ -255,14 +265,16 @@ public class Ident: Expr {
     }
     override public var mathml: String {
         if obj.name == "pi" { return variable("\\pi") }
-        return variable(obj.name)
+        return "{" + variable(obj.name) + "}"
     }
 }
 
 public class IntCon: Expr {
     var val: Double
     
-    init(_ x:Double) { val = x }
+    init(_ x:String) {
+        val = Double(x) ?? 0
+    }
     override public func dump() { printn("\(val)") }
     override public var value: Double { return val }
     override public var mathml: String {
@@ -303,7 +315,7 @@ public class Assignment: Stat {
         if !l.isEmpty {
             x += variable(l) + symbol("=")
         }
-        return x + e + "\n"
+        return x + e
     }
 }
 
