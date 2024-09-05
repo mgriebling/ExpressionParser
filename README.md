@@ -6,7 +6,10 @@ and produces both a `LaTeX` translation and an evaluated result.
 For example, the following:
 
 ```swift
-let e = ExpressionParser("56.7sin(pi/2)")
+let e = ExpressionParser("\\frac{-{b}+\\sqrt{{b}^{2}-4{}{a}\\times{c}}}{2{}{a}}")
+Ident.addSymbol(("a", 1))
+Ident.addSymbol(("b", -3))
+Ident.addSymbol(("c", -4))
 if let b = e.parse() {
     print(b)
 }
@@ -15,25 +18,26 @@ if let b = e.parse() {
 produces an output of:
 
 ```
-("56.7{}\\sin(\\frac{\\pi}{2})", 56.7)
+("\\frac{-{b}+\\sqrt{{b}^{2}-4{}{a}\\times{c}}}{2{}{a}}", 4.0)
 ```
 
 where the `LaTeX` string gives the following typeset equation
-$56.7{}\sin(\frac{\pi}{2})$
+$\frac{-{b}+\sqrt{{b}^{2}-4{}{a}\times{c}}}{2{}{a}}$
 
 ## Usage
 In your project's `Package.swift` file add a dependency like
 
 ```
 dependencies: [
-    .package(url: "https://github.com/mgriebling/BigInt.git", from: "2.0.0"),
+    .package(url: "https://github.com/mgriebling/ExpressionParser.git", from: "0.1.0"),
 ]
 ```
 
 ## Theory
 
 **ExpressionParser** contains two source files, `Parser.swift` and `Scanner.swift`.
-They were produced by the Coco compiler translating an input ATG (Attributable
+They were produced by the Coco compiler [https://github.com/mgriebling/Coco]
+translating an input ATG (Attributable
 Target Grammar) file (exp.atg) that describes the operations to be scanned
 and parsed in a compact text format.  The `Coco` compiler generator also
 requires some `.frame` files into which sections of code are inserted to
