@@ -1,7 +1,7 @@
 # ExpressionParser
 
 The **ExpressionParser** package parses and evaluates mathematical expressions
-and produces both a $\LaTeX$ translation and an evaluated result.
+and produces both a `LaTeX` translation and an evaluated result.
 
 For example, the following:
 
@@ -18,7 +18,7 @@ produces an output of:
 ("56.7{}\\sin(\\frac{\\pi}{2})", 56.7)
 ```
 
-where the $\LaTeX$ string gives the following typeset equation
+where the `LaTeX` string gives the following typeset equation
 $56.7{}\sin(\frac{\pi}{2})$
 
 ## Usage
@@ -39,6 +39,6 @@ and parsed in a compact text format.  The `Coco` compiler generator also
 requires some `.frame` files into which sections of code are inserted to
 produce the final swift parser and scanner files.  An Abstract Syntax Tree
 representation (AST) is built up using the `AST.swift` data type. This
-tree is then evaluated to generate the $\LaTeX$ translation and evaluates
+tree is then evaluated to generate the `LaTeX` translation and evaluates
 a result.  For more details about `Coco` refer to the 
 https://ssw.jku.at/Research/Projects/Coco/ web site.
