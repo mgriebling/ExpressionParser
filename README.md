@@ -20,7 +20,7 @@ produces an output of:
 
 where the *LaTeX* string gives the following typeset equation:
 
-$\sin(\frac{\pi}{2})$
+$56.7{}\sin(\frac{\pi}{2})$
 
 ## Usage
 In your projects Package.swift file add a dependency like
