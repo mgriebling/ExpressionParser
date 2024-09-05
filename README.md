@@ -37,8 +37,7 @@ dependencies: [
 
 **ExpressionParser** contains two source files, `Parser.swift` and `Scanner.swift`.
 They were produced by the Coco compiler [https://github.com/mgriebling/Coco]
-translating an input ATG (Attributable
-Target Grammar) file (exp.atg) that describes the operations to be scanned
+translating an input ATG (Attributed Grammar) file (exp.atg) that describes the operations to be scanned
 and parsed in a compact text format.  The `Coco` compiler generator also
 requires some `.frame` files into which sections of code are inserted to
 produce the final swift parser and scanner files.  An Abstract Syntax Tree
