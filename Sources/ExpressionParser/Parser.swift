@@ -131,15 +131,7 @@ public class Parser {
 	func Program() {
 		curBlock = Proc("", nil, self); curBlock.block = Block() 
 		BlockList(curBlock.block)
-		result = (curBlock.mathml, curBlock.block!.value)
-		// if let f = OutputStream(toFileAtPath: "test.html", append: false), let d = x.data(using: .utf8) {
-		//   f.open()
-		//   let bytes = [UInt8](d)
-		//   f.write(bytes, maxLength: bytes.count)
-		//   print("\n\n\(x)")
-		//   f.close()
-		//}
-		
+		result = (curBlock.mathml, curBlock.block!.value)  
 	}
 
 	func BlockList(_ b: Block?) {
@@ -272,7 +264,7 @@ public class Parser {
 	}
 
 	func Factor(_ e: inout Expr?) {
-		var name = ""; var f:Expr?; var op = Operator.EQU 
+		var name = ""; var f, g:Expr?; var op = Operator.EQU 
 		switch la.kind {
 		case _ident: 
 			e = nil; f = nil 
@@ -295,10 +287,29 @@ public class Parser {
 			}
 		case _number: 
 			Get()
-			e = IntCon(Double(t.val) ?? 0) 
-			if la.kind == _squared || la.kind == _cubed || la.kind == 29 /* "!" */ {
-				UnaryOp(&op)
-				e = UnaryExpr(op, e) 
+			e = IntCon(t.val) 
+			if StartOf(5) {
+				if la.kind == _squared || la.kind == _cubed || la.kind == 29 /* "!" */ {
+					UnaryOp(&op)
+				} else {
+					e = UnaryExpr(op, e) 
+					Get()
+					name = t.val; f = Ident(curBlock.find(name)) 
+					if la.kind == 16 /* "(" */ {
+						Get()
+						Expression(&g)
+						Expect(18 /* ")" */)
+					}
+					if g == nil {
+					  // implied multiplication to var
+					  e = BinExpr(e, .IMUL, f)
+					} else {
+					  // implied multiplication to func
+					  f = BuiltInProc(name, g)
+					  e = BinExpr(e, .IMUL, f)
+					}
+					
+				}
 			}
 		case 19 /* "-" */: 
 			Get()
@@ -363,7 +374,8 @@ public class Parser {
 		[_x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _T,_T,_T,_T, _T,_T,_x,_x],
 		[_x,_x,_x,_x, _x,_T,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_T, _x,_x,_x,_T, _T,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x],
 		[_x,_x,_x,_T, _T,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_T,_T,_T, _T,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x],
-		[_x,_T,_T,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _T,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_T,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x]
+		[_x,_T,_T,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _T,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_T,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x],
+		[_x,_T,_T,_x, _x,_x,_T,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x, _x,_T,_x,_x, _x,_x,_x,_x, _x,_x,_x,_x]
 
 	]
 } // end Parser
