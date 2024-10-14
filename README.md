@@ -22,6 +22,7 @@ produces an output of:
 ```
 
 where the `LaTeX` string gives the following typeset equation
+
 $\frac{-{b}+\sqrt{{b}^{2}-4{}{a}\times{c}}}{2{}{a}}$
 
 ## Usage

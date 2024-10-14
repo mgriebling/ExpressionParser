@@ -1,4 +1,4 @@
-// swift-tools-version: 5.10
+// swift-tools-version: 5.9
 // The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
@@ -6,8 +6,8 @@ import PackageDescription
 let package = Package(
     name: "ExpressionParser",
     platforms: [
-        .macOS("15.0"), .iOS("18.0"), .macCatalyst("15.0"), .tvOS("18.0"),
-        .watchOS("11.0")
+		.macOS("13.3"), .iOS("16.4"), .macCatalyst("13.3"), .tvOS("16.4"),
+		.watchOS("9.4")
     ],
     products: [
         // Products define the executables and libraries a package produces, making them visible to other packages.
@@ -26,7 +26,8 @@ let package = Package(
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
             name: "ExpressionParser",
-            dependencies: ["BigDecimal"]
+            dependencies: ["BigDecimal"],
+			exclude: ["Support/Copyright.frame", "Support/exp.atg", "Support/Parser.frame", "Support/Scanner.frame"]
         ),
         .testTarget(
             name: "ExpressionParserTests",
